@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1
+package v2
 
 import (
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
@@ -25,11 +25,27 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ConcurrencyPolicy describes how the job will be handled.
-// Only one of the following concurrent policies may be specified.
-// If none of the following policies is specified, the default one
-// is AllowConcurrent.
-// +kubebuilder:validation:Enum=Allow;Forbid;Replace
+type CronField string
+
+// describes a Cron schedule.
+type CronSchedule struct {
+	// specifies the minute during which the job executes.
+	// +optional
+	Minute *CronField `json:"minute,omitempty"`
+	// specifies the hour during which the job executes.
+	// +optional
+	Hour *CronField `json:"hour,omitempty"`
+	// specifies the day of the month during which the job executes.
+	// +optional
+	DayOfMonth *CronField `json:"dayOfMonth,omitempty"`
+	// specifies the month during which the job executes.
+	// +optional
+	Month *CronField `json:"month,omitempty"`
+	// specifies the day of the week during which the job executes.
+	// +optional
+	DayOfWeek *CronField `json:"dayOfWeek,omitempty"`
+}
+
 type ConcurrencyPolicy string
 
 const (
@@ -46,10 +62,11 @@ const (
 
 // CronJobSpec defines the desired state of CronJob.
 type CronJobSpec struct {
-	// +kubebuilder:validation:MinLength=0
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
 
 	// The schedule in Cron format, see https://en.wikipedia.org/wiki/Cron.
-	Schedule string `json:"schedule"`
+	Schedule CronSchedule `json:"schedule"`
 
 	// +kubebuilder:validation:Minimum=0
 
@@ -105,9 +122,6 @@ type CronJobStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:storageversion
-// +kubebuilder:conversion:hub
-// +versionName=v1
 
 // CronJob is the Schema for the cronjobs API.
 type CronJob struct {
