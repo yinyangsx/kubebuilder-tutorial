@@ -41,6 +41,7 @@ import (
 	batchv2 "github.com/yinyangsx/kubebuilder-tutorial/api/v2"
 	"github.com/yinyangsx/kubebuilder-tutorial/internal/controller"
 	webhookbatchv1 "github.com/yinyangsx/kubebuilder-tutorial/internal/webhook/v1"
+	webhookbatchv2 "github.com/yinyangsx/kubebuilder-tutorial/internal/webhook/v2"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -215,6 +216,13 @@ func main() {
 	// nolint:goconst
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = webhookbatchv1.SetupCronJobWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "CronJob")
+			os.Exit(1)
+		}
+	}
+	// nolint:goconst
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = webhookbatchv2.SetupCronJobWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "CronJob")
 			os.Exit(1)
 		}
