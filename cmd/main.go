@@ -38,6 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	batchv1 "github.com/yinyangsx/kubebuilder-tutorial/api/v1"
+	batchv2 "github.com/yinyangsx/kubebuilder-tutorial/api/v2"
 	"github.com/yinyangsx/kubebuilder-tutorial/internal/controller"
 	webhookbatchv1 "github.com/yinyangsx/kubebuilder-tutorial/internal/webhook/v1"
 	// +kubebuilder:scaffold:imports
@@ -52,6 +53,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(batchv1.AddToScheme(scheme))
+	utilruntime.Must(batchv2.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
