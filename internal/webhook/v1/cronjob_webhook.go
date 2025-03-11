@@ -41,7 +41,12 @@ var cronjoblog = logf.Log.WithName("cronjob-resource")
 func SetupCronJobWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).For(&batchv1.CronJob{}).
 		WithValidator(&CronJobCustomValidator{}).
-		WithDefaulter(&CronJobCustomDefaulter{}).
+		WithDefaulter(&CronJobCustomDefaulter{
+			DefaultConcurrencyPolicy:          batchv1.AllowConcurrent,
+			DefaultSuspend:                    false,
+			DefaultSuccessfulJobsHistoryLimit: 3,
+			DefaultFailedJobsHistoryLimit:     1,
+		}).
 		Complete()
 }
 
@@ -56,6 +61,11 @@ func SetupCronJobWebhookWithManager(mgr ctrl.Manager) error {
 // as it is used only for temporary operations and does not need to be deeply copied.
 type CronJobCustomDefaulter struct {
 	// TODO(user): Add more fields as needed for defaulting
+	// Default values for various CronJob fields
+	DefaultConcurrencyPolicy          batchv1.ConcurrencyPolicy
+	DefaultSuspend                    bool
+	DefaultSuccessfulJobsHistoryLimit int32
+	DefaultFailedJobsHistoryLimit     int32
 }
 
 var _ webhook.CustomDefaulter = &CronJobCustomDefaulter{}
@@ -72,22 +82,22 @@ func (d *CronJobCustomDefaulter) Default(ctx context.Context, obj runtime.Object
 	// TODO(user): fill in your defaulting logic.
 
 	if cronjob.Spec.ConcurrencyPolicy == "" {
-		cronjob.Spec.ConcurrencyPolicy = batchv1.AllowConcurrent
+		cronjob.Spec.ConcurrencyPolicy = d.DefaultConcurrencyPolicy
 	}
 
 	if cronjob.Spec.Suspend == nil {
 		cronjob.Spec.Suspend = new(bool)
-		*cronjob.Spec.Suspend = false
+		*cronjob.Spec.Suspend = d.DefaultSuspend
 	}
 
 	if cronjob.Spec.SuccessfulJobsHistoryLimit == nil {
 		cronjob.Spec.SuccessfulJobsHistoryLimit = new(int32)
-		*cronjob.Spec.SuccessfulJobsHistoryLimit = 3
+		*cronjob.Spec.SuccessfulJobsHistoryLimit = d.DefaultSuccessfulJobsHistoryLimit
 	}
 
 	if cronjob.Spec.FailedJobsHistoryLimit == nil {
 		cronjob.Spec.FailedJobsHistoryLimit = new(int32)
-		*cronjob.Spec.FailedJobsHistoryLimit = 1
+		*cronjob.Spec.FailedJobsHistoryLimit = d.DefaultFailedJobsHistoryLimit
 	}
 
 	return nil
