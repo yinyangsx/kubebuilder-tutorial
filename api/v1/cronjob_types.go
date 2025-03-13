@@ -108,7 +108,7 @@ type CronJobStatus struct {
 // +kubebuilder:storageversion
 // +kubebuilder:conversion:hub
 // +versionName=v1
-// +kubebuilder:printcolumn:name="Suspend",type=bool,JSONPath=`.spec.Suspend`
+// +kubebuilder:printcolumn:name="Suspend",type=boolean,JSONPath=`.spec.Suspend`
 
 // CronJob is the Schema for the cronjobs API.
 type CronJob struct {

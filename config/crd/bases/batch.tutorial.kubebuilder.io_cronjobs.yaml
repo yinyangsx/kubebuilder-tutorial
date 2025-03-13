@@ -17,7 +17,7 @@ spec:
   - additionalPrinterColumns:
     - jsonPath: .spec.Suspend
       name: Suspend
-      type: bool
+      type: boolean
     name: v1
     schema:
       openAPIV3Schema:
