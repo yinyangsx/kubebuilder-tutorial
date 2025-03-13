@@ -14,7 +14,11 @@ spec:
     singular: cronjob
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.Suspend
+      name: Suspend
+      type: bool
+    name: v1
     schema:
       openAPIV3Schema:
         description: CronJob is the Schema for the cronjobs API.
