@@ -1,6 +1,8 @@
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
-PROXY_URL ?= http://172.27.128.1:7890
+HTTP_PROXY ?= http://172.27.128.1:7890
+HTTPS_PROXY ?= http://172.27.128.1:7890
+NO_PROXY ?= "localhost,127.0.0.1,10.96.0.0/12,192.168.49.0/24"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -105,7 +107,7 @@ run: manifests generate fmt vet ## Run a controller from your host.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 .PHONY: docker-build
 docker-build: ## Build docker image with the manager.
-	$(CONTAINER_TOOL) build --build-arg HTTP_PROXY=$(PROXY_URL) --build-arg HTTPS_PROXY=$(PROXY_URL) -t ${IMG} .
+	$(CONTAINER_TOOL) build --build-arg HTTP_PROXY=$(HTTP_PROXY) --build-arg HTTPS_PROXY=$(HTTPS_PROXY) --build-arg NO_PROXY=$(NO_PROXY) -t ${IMG} .
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
@@ -122,9 +124,9 @@ PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
 docker-buildx: ## Build and push docker image for the manager for cross-platform support
 	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
 	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
-	- $(CONTAINER_TOOL) buildx create --name kubebuilder-tutorial-builder
+	- $(CONTAINER_TOOL) buildx create --driver-opt env.http_proxy=$(HTTP_PROXY) --driver-opt env.https_proxy=$(HTTPS_PROXY) --driver-opt '"env.no_proxy='$(NO_PROXY)'"' --name kubebuilder-tutorial-builder
 	$(CONTAINER_TOOL) buildx use kubebuilder-tutorial-builder
-	- $(CONTAINER_TOOL) buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross .
+	- $(CONTAINER_TOOL) buildx build --build-arg HTTP_PROXY=$(HTTP_PROXY) --build-arg HTTPS_PROXY=$(HTTPS_PROXY) --build-arg NO_PROXY="$(NO_PROXY)" --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross .
 	- $(CONTAINER_TOOL) buildx rm kubebuilder-tutorial-builder
 	rm Dockerfile.cross
 
